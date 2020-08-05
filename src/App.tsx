@@ -6,9 +6,18 @@ import ReactAudioPlayer from 'react-audio-player';
 
 //import ReactAudioPlayer from 'react-audio-player'
 
-var audio : HTMLAudioElement | null;
+var audio_main : HTMLAudioElement | null = new Audio();
 var check_time : number;
 check_time = 0;
+
+let audio_0 : HTMLAudioElement = new Audio(require('./drum/0.wav'));
+let audio_1 : HTMLAudioElement = new Audio(require('./drum/1.wav'));
+let audio_2 : HTMLAudioElement = new Audio(require('./drum/2.wav'));
+let audio_3 : HTMLAudioElement = new Audio(require('./drum/3.wav'));
+let audio_4 : HTMLAudioElement = new Audio(require('./drum/4.wav'));
+
+let audio_list : HTMLAudioElement[] = [audio_0, audio_1, audio_2, audio_3, audio_4]
+
 
 let bpm_times: number[] = [];
 
@@ -119,13 +128,13 @@ sync_time_3 = [1.5240004773837124, 4.050316266857397, 6.57663205633108,
 
 function App() {
 
-  audio = document.querySelector('#audio');
-  audio = new Audio(require("./audio/Faded_95.wav"));
+  audio_main = document.querySelector('#audio');
+  audio_main = new Audio(require("./audio/Faded_95.wav"));
   //audio.volume = 1; 
 
-  if (audio != null) {
+  if (audio_main != null) {
     //audio.src = require("./audio/Faded_95.wav");
-    audio.volume = 1;
+    audio_main.volume = 1;
     //audio.load();
   }
 
@@ -134,81 +143,95 @@ function App() {
   //audio.volume = 1;
   
   return (
-    <div>
+    <body onKeyPress={handleKeyPress} tabIndex={-1}>
       <input onClick={load} type="button" value="load"></input>
       <input onClick={start} type="button" value="start"></input>
       <button id="puase_button" onClick={pause} type="button" value="0">pause</button>
       <button id="stop_button" onClick={stop} type="button" value="0">stop</button>
       <br/>
-      <input id="check_b" onClick={check} type="button" value={check_time}></input>
+      <audio id="audio" src="#" controls></audio>
+      <br/>
+      <text>=============================resync function===========================</text>
+      <br/>
+      <input id="check_b" onClick={check} type="button" value="check!"></input>
       <br/>
       <input id="list" type="button" value={bpm_times.join()}></input>
       <br/>
       <input id="resync" onClick={resync} type="button" value="resync"></input>
-      <br/>
-      <audio id="audio" src="#" controls></audio>
       <br/>
       <input id="sync1" type="button" value="sync1"></input>
       <input id="sync2" type="button" value="sync2"></input>
       <input id="sync3" type="button" value="sync3"></input>
       <input id="sync4" type="button" value="sync4"></input>
       <br/>
-      <input id="re_sync" onClick={resync} type="button" value={check_time}></input>
-    </div>
+      <text>=============================preset function===========================</text>
+      <br/>
+      <input id="play_test" onClick={play_preset} type="button" value="test"></input>
+      <input id="play_test" onClick={handleKeyPress} type="button" value="audio1" onKeyPress={handleKeyPress} tabIndex={-1}></input>
+    </body>
   );
 }
 
 function load(): void{
-  audio = document.querySelector('#audio');
+  audio_main = document.querySelector('#audio');
   //audio = new Audio(require("./audio/Faded_95.wav"));
   //audio.volume = 1; 
 
-  if (audio != null) {
+  if (audio_main != null) {
 
-    audio.src = require("./audio/Faded_95.wav");
-    audio.volume = 1;
-    audio.currentTime = 0;
-    audio.preload = "auto"
-    audio.load();
-    alert("Loading success");
+    audio_main.src = require("./audio/Faded_95.wav");
+    audio_main.volume = 0.5;
+    audio_main.currentTime = 0;
+    audio_main.preload = "auto"
+    audio_main.load();
+    
   }
   //audio = new Audio(require("./audio/Faded_95.wav"));
   //audio.volume = 1;
-  let sync1b : HTMLInputElement | null = document.querySelector('#sync1');
-  sync1b?.setAttribute("value", "+++++")
+  let syncb : HTMLInputElement | null = document.querySelector('#sync1');
+  syncb?.setAttribute("value", "+++++")
+  syncb = document.querySelector('#sync2');
+  syncb?.setAttribute("value", "sync2")
+  syncb = document.querySelector('#sync3');
+  syncb?.setAttribute("value", "sync3")
+  syncb = document.querySelector('#sync4');
+  syncb?.setAttribute("value", "sync4")
 }
 
 function start(): void // no ';' here
 {
-  if (audio != null)
-    audio.play();
+  if (audio_main != null)
+    audio_main.play();
 }
 
 function pause(): void // no ';' here
 {
-  if (audio != null)
-    audio.pause();
+  if (audio_main != null)
+    audio_main.pause();
   return;
 }
 
 function stop(): void // no ';' here
 {
-  if (audio != null)
+  if (audio_main != null)
   {
-    audio.pause();
-    audio.currentTime = 0;
+    audio_main.pause();
+    audio_main.currentTime = 0;
   }
   return;
 }
 
+//===========================================resync function=====================================
+
+//get input (user bpm) 
 function check(): void // no ';' here
 {
-  if (audio != null)
+  if (audio_main != null)
   {
-    bpm_times.push(audio.currentTime);
-    check_time = audio.currentTime;
+    bpm_times.push(audio_main.currentTime);
+    check_time = audio_main.currentTime;
     //console.log(check_time);
-    document.querySelector("#check_b")?.setAttribute("value",check_time.toString());
+    //document.querySelector("#check_b")?.setAttribute("value",check_time.toString());
     document.querySelector("#list")?.setAttribute("value",bpm_times.join().toString());
   }
   return;
@@ -353,5 +376,197 @@ function resync(): string // no ';' here
 
   return "sync finished";
 }
+//===========================================preset function=====================================
+
+let preset_info : number[][];
+//kick: 0, open high hat:1, closed high hat:2, snare: 3, clap: 4
+
+preset_info = [[0, 0], [2, 0.25], [3, 0.5], [2, 0.75]];
+
+preset_info = [[0, 0], [0, 0.1875], [0, 0.4375], [0, 0.5], [0, 0.625], [3, 0.25], [3, 0.75], [3, 0.875], [3, 0.9375], 
+[2, 0], [2, 0.125], [2, 0.1875], [2, 0.25], [2, 0.375], [2, 0.4375], [2, 0.5], [2, 0.625], [2, 0.6875], [2, 0.75], [2, 0.875], [2, 0.9375]];
+
+let Interval_info : NodeJS.Timeout [] = [];
+
+
+function play_preset(): void // no ';' here
+{
+  if (Interval_info.length != 0)
+  {
+    for(var i=0; i<Interval_info.length; i++)
+    {
+      clearInterval(Interval_info[i])
+    }
+    Interval_info = [];
+    return;
+  }
+
+  let bpm : number = 95;
+  let one_bar_length : number = 60 / bpm * 4;
+
+  let pre_position : number = 0;
+  
+  //setTimeout(function(){}, preset_info[0][1] * one_bar_length * 1000);
+  //audio_0.play()
+  //setTimeout(function(){play_instrument2(audio_3)}, 1000);
+  //setTimeout(function(){audio_4.play()}, 500);
+  let start_preset_sync_index : number = 0;
+
+  if (audio_main != null)
+  {
+    while(sync_time_1[start_preset_sync_index] < audio_main.currentTime)
+    {
+      start_preset_sync_index++;
+      console.log(sync_time_1[start_preset_sync_index])
+      console.log(audio_main.currentTime)
+    }
+  }
+  var wait_time : number = 0
+  if (audio_main != null)
+    //wait_time = (sync_time_1[start_preset_sync_index] - audio_main.currentTime) * 1000
+
+  for(var i=0; i<preset_info.length; i++)
+  {
+    let audio_t = audio_list[preset_info[i][0]];
+    setTimeout(function(){
+        play_instrument2(audio_t)
+    },
+    preset_info[i][1] * one_bar_length * 1000);
+  }
+
+  if (audio_main != null)
+  { 
+    for(var i=0; i<preset_info.length; i++)
+    {
+      let audio_t = audio_list[preset_info[i][0]];
+
+      setTimeout(function(){
+      Interval_info.push(
+        setInterval(
+        function() {
+          play_instrument2(audio_t)
+        },
+        one_bar_length * 1000
+      ))
+      },
+      preset_info[i][1] * one_bar_length * 1000)
+    }
+    console.log(wait_time)
+  }
+  
+
+/*
+  setTimeout(function(){}, preset_info[0][1] * one_bar_length * 1000);
+  play_instrument(preset_info[0][0], one_bar_length)
+
+  setInterval(
+    function() {
+      console.log("one")
+    },
+    1000
+  )
+  setTimeout(function(){}, 500);
+  setInterval(
+    function() {
+      console.log("two")
+    },
+    1000
+  )
+  for(var i=1; i<preset_info.length; i++)
+  {
+    setTimeout(function(){},(preset_info[i][1] - preset_info[i - 1][1]) * one_bar_length * 1000);
+    play_instrument(preset_info[i][0], one_bar_length)
+  }
+*/
+  //play_instrument(0, one_bar_length);
+}
+
+function play_instrument(instrument : number, term : number) : void
+{
+  let audio_t : HTMLAudioElement;
+  //let inst_path : string = './drum/'.concat(instrument.toString(),'.wav')
+  if (instrument === 0)
+    audio_t = new Audio(require('./drum/0.wav'));
+  else if (instrument === 1)
+    audio_t = new Audio(require('./drum/1.wav'));
+  else if (instrument === 2)
+    audio_t = new Audio(require('./drum/2.wav'));
+  else if (instrument === 3)
+  {
+    audio_t = new Audio(require('./drum/3.wav'));
+    //audio_t.volume = 0.3;
+  }
+  else if (instrument === 4)
+    audio_t = new Audio(require('./drum/4.wav'));
+  
+  setInterval(
+    function() {
+      audio_t.currentTime = 0;
+      audio_t.play();
+    },
+    1000
+  )
+}
+
+function play_instrument2(instrument : HTMLAudioElement) : void
+{
+  instrument.currentTime = 0;
+  instrument.play();
+}
+
+//private onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+//  console.log(e.key)
+//}
+
+function beat_key_play (e: React.KeyboardEvent<HTMLDivElement>) : void
+{
+
+}
+
+let handleKeyPress = (event : any) => {
+  switch (event.key)
+  {
+    case 'q':
+      play_0();
+      break;
+    case 'w':
+      play_3();
+      break;
+    case 'e':
+      play_2();
+      break;
+  }
+}
+
+function play_0() : void
+{
+  audio_0.currentTime = 0;
+  audio_0.play()
+}
+
+function play_1() : void
+{
+  audio_1.currentTime = 0;
+  audio_1.play()
+}
+
+function play_2() : void
+{
+  audio_2.currentTime = 0;
+  audio_2.play()
+}
+
+function play_3() : void
+{
+  audio_3.currentTime = 0;
+  audio_3.play()
+}
+
+function play_4() : void
+{
+  audio_4.currentTime = 0;
+  audio_4.play()
+}
+
 
 export default App;
