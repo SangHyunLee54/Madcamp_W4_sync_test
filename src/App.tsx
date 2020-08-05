@@ -166,7 +166,7 @@ function App() {
       <br/>
       <text>=============================preset function===========================</text>
       <br/>
-      <input id="play_test" onClick={play_preset} type="button" value="test"></input>
+      <input id="play_test" onClick={play_preset_sync} type="button" value="test"></input>
       <input id="play_test" onClick={handleKeyPress} type="button" value="audio1" onKeyPress={handleKeyPress} tabIndex={-1}></input>
     </body>
   );
@@ -388,6 +388,32 @@ preset_info = [[0, 0], [0, 0.1875], [0, 0.4375], [0, 0.5], [0, 0.625], [3, 0.25]
 
 let Interval_info : NodeJS.Timeout [] = [];
 
+function play_preset_sync(): void
+{
+  let start_preset_sync_index : number = 0;
+
+  if (audio_main != null)
+  {
+    while(sync_time_1[start_preset_sync_index] < audio_main.currentTime)
+    {
+      start_preset_sync_index++;
+      console.log(sync_time_1[start_preset_sync_index])
+      console.log(audio_main.currentTime)
+    }
+  }
+
+  var wait_time : number = 0
+  if (audio_main != null)
+    wait_time = (sync_time_1[start_preset_sync_index] - audio_main.currentTime) * 1000
+
+  setTimeout(
+    function(){
+      play_preset()
+      console.log(wait_time)
+    },
+    wait_time - 250
+  )
+}
 
 function play_preset(): void // no ';' here
 {
@@ -411,7 +437,7 @@ function play_preset(): void // no ';' here
   //setTimeout(function(){play_instrument2(audio_3)}, 1000);
   //setTimeout(function(){audio_4.play()}, 500);
   let start_preset_sync_index : number = 0;
-
+  /*
   if (audio_main != null)
   {
     while(sync_time_1[start_preset_sync_index] < audio_main.currentTime)
@@ -424,7 +450,7 @@ function play_preset(): void // no ';' here
   var wait_time : number = 0
   if (audio_main != null)
     //wait_time = (sync_time_1[start_preset_sync_index] - audio_main.currentTime) * 1000
-
+  */
   for(var i=0; i<preset_info.length; i++)
   {
     let audio_t = audio_list[preset_info[i][0]];
@@ -451,7 +477,6 @@ function play_preset(): void // no ';' here
       },
       preset_info[i][1] * one_bar_length * 1000)
     }
-    console.log(wait_time)
   }
   
 
